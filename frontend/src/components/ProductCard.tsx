@@ -1,4 +1,4 @@
-import { useContext } from "react";
+import { useContext, useEffect } from "react";
 import { appContext } from "../App";
 import { Product } from "../interfaces";
 
@@ -7,17 +7,30 @@ interface ProductCardProps {
 }
 
 export const ProductCard = ({ product }: ProductCardProps) => {
-  const { cart, setCart} = useContext(appContext)
-  
+  const { setCart, totalPrice, setFavorites, favorites } = useContext(appContext)
   const { name, model, brand, price, description, image  } = product;
   
   const handleAddCart = ( product: Product ) => {
-    if (cart.length >= 3 ) return;
+    if ( totalPrice + product.price >= 80 ) return;
     setCart((cart: Product[]) => [...cart, product])   
   }
 
+  const setFavoriteProduct = (id: Product['id']) => {
+    setFavorites({
+      ...favorites,
+      [id]: !favorites[id]
+    })
+  }
+  
+  useEffect(() => {
+    localStorage.setItem('favorites', JSON.stringify(favorites))
+  }, [favorites])
+  
   return (
-    <div className="border border-rose-400 py-3 px-2 rounded-md max-w-xs">
+    <div className="relative border border-rose-400 py-3 px-2 rounded-md max-w-xs">
+      <i onClick={() => setFavoriteProduct(product.id)} 
+        className={`bx ${!favorites[product.id] ? 'bx-heart' : 'bxs-heart'} absolute text-5xl text-rose-500 right-4 top-4 cursor-pointer`}
+      ></i>
       <img src={`http://localhost:4000/images/${image}`} alt={name} />
       <div className="flex flex-col space-y-3">
         <h2 className="text-2xl">{`${name} - ${model}`}</h2>
